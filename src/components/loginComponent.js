@@ -26,10 +26,12 @@ export const Login=()=>(
      <Container mt="auto" className="cnt">
      <Row className="justify-content-md-center">
          <Col md="6">
+         <a href="http://localhost:8080/auth">
          <Button className="Loginbtn"block size="lg" type="submit" variant="primary"
          >
-           <a href="http://127.0.0.1:8080/auth">Login</a>
+           Login
          </Button>
+         </a>
                  </Col>
                  </Row>
                 </Container>     

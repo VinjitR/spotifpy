@@ -1,12 +1,11 @@
 import json
-from flask import Flask, request, redirect, g, render_template,jsonify,session
-
+from flask import Flask, request, redirect, g, render_template,jsonify,make_response
+import mysql.connector
 import requests
 from urllib.parse import quote
 from pymongo import MongoClient
 from werkzeug.datastructures import Headers
-from  flask_cors import CORS
-
+from flask_cors import CORS
 
 
 
@@ -53,7 +52,14 @@ auth_query_parameters = {
 
 client = MongoClient("mongodb+srv://alias:password#123@cluster0.b7d2i.mongodb.net/Spotifpy?retryWrites=true&w=majority")
 db= client.get_database('Spotipfy')
+#Mysql databse
 
+with open('mysql_config.json') as f:
+            data = json.load(f)
+            user=data["user"]
+            password=data["password"]
+            host=data["host"]
+            database=data["database"]
 
 # spotify endpoints
 USER_PROFILE_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'me')
@@ -66,6 +72,8 @@ BROWSE_FEATURED_PLAYLISTS = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse',
                                               'featured-playlists')
 USER_CURRENTLY_PLAYED_ENDPOINT="{}/{}/{}".format(USER_PROFILE_ENDPOINT,
                                                   'player', 'currently-playing')
+
+session={}
 
 @app.route('/',methods=['POST','GET'])
 def index():
@@ -82,6 +90,7 @@ def auth():
 @app.route("/callback/")
 def callback():
     global users
+    global session
     data={}
     data['all_data']={}
     # Auth Step 4: Requests refresh and access tokens
@@ -158,18 +167,24 @@ def callback():
         users.update_one(data,{'$set':data},upsert=True)
     return redirect("http://localhost:3000/Home")
 
-@app.route("/profile",methods=['GET'])
+@app.route("/api/profile",methods=['GET','POST'])
 def profile():
-    print(session['user'])
+    
     users=db.users
     documents = users.find({"Name":session['user']})
     response = []
     for document in documents:
         document['_id'] = str(document['_id'])
         response.append(document['all_data']['user_data'])
-    return jsonify(response)
 
-@app.route("/playlists")
+    res=make_response(jsonify(response))
+    res.headers.add("Access-Control-Allow-Origin", "*")
+    res.headers.add('Access-Control-Allow-Headers', "*")
+    res.headers.add('Access-Control-Allow-Methods', "*")
+
+    return res
+
+@app.route("/api/playlists")
 def playlists():
     users=db.users
     documents = users.find({"Name":session['user']})
@@ -183,7 +198,7 @@ def playlists():
 
     return jsonify(playlists)
 
-@app.route("/tracks")
+@app.route("/api/tracks")
 def tracks():
     users=db.users
     documents = users.find({"Name":session['user']})
@@ -200,6 +215,40 @@ def tracks():
         track_albums.append(i['album']['name'])
     return jsonify(track_names,track_popularity,track_albums)
 
+@app.route("/api/trending_tracks")
+def trending_tracks():
+    cnx = mysql.connector.connect(user=user, password=password,host=host,database=database)
+    cursor = cnx.cursor()
+    sql="select artist, track_name, count(trackid) from Tweets group by trackid order by count(trackid) desc limit 20;"
+    cursor.execute(sql)
+    res=cursor.fetchall()
+    twitter_trending_tracks=[]
+    for i in res :
+        track_det={}
+        track_det["track_artist"]=i[0]
+        track_det["track_name"]=i[1]
+        track_det["track_trend"]=i[2]
+        twitter_trending_tracks.append(track_det)
+    
+    return jsonify(twitter_trending_tracks)
+
+@app.route("/api/trending_artists")
+def trending_artists():
+    cnx = mysql.connector.connect(user=user, password=password,host=host,database=database)
+    cursor1 = cnx.cursor()
+    sql2="select artist, count(artist) from Tweets group by artist order by count(artist) desc ;"
+
+    cursor1.execute(sql2)
+    res1=cursor1.fetchall()
+
+    twitter_trending_artists=[]
+    for i in res1:
+        art_det={}
+        art_det["artist_name"]=i[0]
+        art_det["artist_trend"]=i[1]
+        twitter_trending_artists.append(art_det)
+    
+    return jsonify(twitter_trending_artists)
 
 
 if __name__ == "__main__":

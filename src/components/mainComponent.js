@@ -3,7 +3,7 @@ import {Jumbotron as Jumbo, Container} from 'react-bootstrap';
 import {Switch,Route, BrowserRouter} from 'react-router-dom'; 
 import { Login } from "./loginComponent";
 import  Home  from "./HomeC";
-
+import Trending from "./TrendingC";
 class Main extends Component {
   render() {
     return (
@@ -11,6 +11,7 @@ class Main extends Component {
         <Switch>
         <Route path="/" component={Login} exact/>
         <Route path="/Home" component={Home}  />
+        <Route path="/Trends" component={Trending}/>
         </Switch>
         </BrowserRouter>
     );
