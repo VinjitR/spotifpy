@@ -25,5 +25,5 @@ yarn-error.log*
 /flask/mongosample.py
 /flask/artist_recommendation.py
 /flask/sparksample.py
-/flask/api_keys.json
+\flask\api_keys.json
 /flask/sample.json
