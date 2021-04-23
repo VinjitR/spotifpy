@@ -8,6 +8,10 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { HeaderC } from './HeaderC';
+import { FooterC } from './FooterC';
+import {Link} from 'react-router-dom';
+import {Button} from 'react-bootstrap';
+
 
 const useStyles = makeStyles({
     table: {
@@ -38,7 +42,7 @@ export default function Trending() {
         getTracks();
         const interval=setInterval(()=>{
             getTracks();
-        },5000);
+        },2000);
         return () => {
             clearInterval(interval)
         }
@@ -55,7 +59,7 @@ export default function Trending() {
         getArtists();
         const interval=setInterval(()=>{
             getArtists();
-        },5000);
+        },2000);
         return () => {
             clearInterval(interval);
         }
@@ -88,9 +92,12 @@ export default function Trending() {
             </TableRow>
           ))}
         </TableBody>
+        <Link to='/horchartT'><Button dark>Chart</Button></Link>
       </Table>
       
     </TableContainer>
+    <br/>
+    <br/>
     <h2>Trending Artists Realtime</h2>
         <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
@@ -98,7 +105,10 @@ export default function Trending() {
             <TableRow>
               <TableCell>Artists</TableCell>
               <TableCell align="right">Trend</TableCell>
+              {/* <TableCell align="right"><Button><Link to='/horchart'></Link></Button></TableCell> */}
+              
             </TableRow>
+            
           </TableHead>
           <TableBody>
             {artists.map((row) => (
@@ -111,7 +121,9 @@ export default function Trending() {
             ))}
           </TableBody>
         </Table>
+        <Link to='/horcharta'><Button dark>Chart</Button></Link>
       </TableContainer>
+      <FooterC/>
       </div>
   );
 }

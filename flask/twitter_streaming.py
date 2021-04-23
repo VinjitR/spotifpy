@@ -64,7 +64,7 @@ class StreamListener(tweepy.StreamListener):
         Spotify = SpotifyAPI()
         sp_url=[]
         try:
-            time.sleep(2)
+            time.sleep(1)
             data_json = json.loads(raw_data)
             timestamp=data_json["timestamp_ms"]
             urls=data_json["entities"]["urls"]

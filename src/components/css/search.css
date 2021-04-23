@@ -1,0 +1,26 @@
+body {
+    padding-top: 20px;
+    
+  }
+  .src{
+    height:200px;
+  }
+  .results{
+    height:600px;
+  }
+  .rs { 
+    border: 1px ;
+    border-style: double;
+    align-items: center;
+  }
+  .cls{
+    border: 1px ;
+    align-items: center;
+    justify-content: center;
+    padding-top: 10px;
+    border-style: dotted;
+  }
+  p{
+    color: white;
+  }
+  

@@ -1,0 +1,20 @@
+.RC{
+    min-height: 600px;
+    align-items: center;
+    justify-content: center;
+}
+.lg{
+    padding-top: 300px;
+}
+.chart{
+    background-color: white;
+}
+
+.colb{
+    margin-left: 10%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+.ur2{
+    align-self: center;
+}

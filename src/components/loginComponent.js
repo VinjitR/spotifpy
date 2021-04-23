@@ -3,16 +3,21 @@ import {Jumbotron} from './JumbotronC';
 import styled from 'styled-components';
 import {Container,Row,Col} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
-import {Link} from 'react-router-dom';
-import axios from 'axios';
+
 
 const Styles = styled.div`
 
   .Loginbtn{
-    color:#022B3A;
+    color:#Black;
+    font-color:White;
   }
   .cnt{
-      margin-top:20px
+      margin-top:0px;
+      align-content-items:center;
+      min-height:300px;
+  }
+  .roer{
+    padding-top:100px
   }
   
 `;
@@ -20,14 +25,14 @@ const Styles = styled.div`
 
 
 export const Login=()=>(
-  <div>
+  <>
      <Styles>
      <Jumbotron/>
-     <Container mt="auto" className="cnt">
-     <Row className="justify-content-md-center">
-         <Col md="6">
+     <Container  className="cnt">
+     <Row className="justify-content-md-center mt-2 roer">
+         <Col md="6" mt="5" m="-20px" >
          <a href="http://localhost:8080/auth">
-         <Button className="Loginbtn"block size="lg" type="submit" variant="primary"
+         <Button className="Loginbtn" block size="lg" type="submit" variant="dark"
          >
            Login
          </Button>
@@ -36,5 +41,5 @@ export const Login=()=>(
                  </Row>
                 </Container>     
      </Styles>
-     </div>
+     </>
 )

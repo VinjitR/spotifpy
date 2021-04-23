@@ -3,24 +3,21 @@ import {Jumbotron as Jumbo } from 'react-bootstrap';
 import {Container} from 'react-bootstrap'; 
 
 const Styles = styled.div`
-  .jumbo {
-    height: 500px;
-    position: relative;
-    background-color:#E1E5F2;
-    padding:70px 80px 70px 30px;
-    margin:0px auto;
-    
-  }
+margin-top:0;
 
   .header-c{
     width:auto;
-    
+    fill:auto;
+    margin:0%;
+    background-color:azure;
   }
   h1{
-    font-family:sans-serif;
-    font-size: 45px;
-    color: #1F7A8C;
-   
+    font-family:Montserrat;
+    font-size: 68px;
+    color: white;
+    margin-left:400px;
+    padding-left:350px;
+    padding-top:20px;
     
   }
   
@@ -30,14 +27,14 @@ const Styles = styled.div`
 export const Jumbotron = () => (
   <Styles>
     <Jumbo fluid className="jumbo">
-    <Container className="header-c">
-    <div className='row row-header'>
-        <div className="col-lg-10 ">
-            <h1 >SPOTIFY LOGIN</h1>
+    </Jumbo>
+    <div className='row row-header justify-content-left align-left rh'>
+        <div className="col-auto">
+            <h1><b><i>SPOTIFY LOGIN</i></b></h1>
                 </div>
               
             </div>
-        </Container>
-        </Jumbo>
+        
+        
         
     </Styles>)

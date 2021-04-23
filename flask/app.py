@@ -6,7 +6,7 @@ from urllib.parse import quote
 from pymongo import MongoClient
 from werkzeug.datastructures import Headers
 from flask_cors import CORS
-
+from user_recommendation import user_rc,artist_rc
 
 
 
@@ -16,7 +16,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app,allow_headers="*")
 #session secret key
 app.secret_key = 'checkers'
 
@@ -72,12 +72,16 @@ BROWSE_FEATURED_PLAYLISTS = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse',
                                               'featured-playlists')
 USER_CURRENTLY_PLAYED_ENDPOINT="{}/{}/{}".format(USER_PROFILE_ENDPOINT,
                                                   'player', 'currently-playing')
-
+SEARCH_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'search')
 session={}
+authhead=""
+
 
 @app.route('/',methods=['POST','GET'])
 def index():
+
     return auth()
+        
 
 @app.route("/auth",methods=['POST','GET'])
 def auth():
@@ -91,6 +95,7 @@ def auth():
 def callback():
     global users
     global session
+    global authhead
     data={}
     data['all_data']={}
     # Auth Step 4: Requests refresh and access tokens
@@ -114,7 +119,7 @@ def callback():
 
     # Auth Step 6: Use the access token to access Spotify API
     authorization_header = {"Authorization": "Bearer {}".format(access_token)}
-    session['auth_header'] = authorization_header
+    authhead = authorization_header
     #user profile endpoint
     user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
     profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
@@ -142,7 +147,7 @@ def callback():
     top_tracks=json.loads(top_t_resp.text)
     data['all_data']['top_tracks']=top_tracks
     #recently playing endpoint
-    url = USER_RECENTLY_PLAYED_ENDPOINT
+    url = USER_RECENTLY_PLAYED_ENDPOINT+'?limit=50'
     recent_resp = requests.get(url, headers=authorization_header)
     recent_tracks=json.loads(recent_resp.text)
     data['all_data']['recent_tracks']=recent_tracks
@@ -178,9 +183,9 @@ def profile():
         response.append(document['all_data']['user_data'])
 
     res=make_response(jsonify(response))
-    res.headers.add("Access-Control-Allow-Origin", "*")
-    res.headers.add('Access-Control-Allow-Headers', "*")
-    res.headers.add('Access-Control-Allow-Methods', "*")
+    # res.headers.add("Access-Control-Allow-Origin", "*")
+    # res.headers.add('Access-Control-Allow-Headers', "*")
+    # res.headers.add('Access-Control-Allow-Methods', "*")
 
     return res
 
@@ -236,7 +241,7 @@ def trending_tracks():
 def trending_artists():
     cnx = mysql.connector.connect(user=user, password=password,host=host,database=database)
     cursor1 = cnx.cursor()
-    sql2="select artist, count(artist) from Tweets group by artist order by count(artist) desc ;"
+    sql2="select artist, count(artist) from Tweets group by artist order by count(artist) desc limit 30;"
 
     cursor1.execute(sql2)
     res1=cursor1.fetchall()
@@ -249,6 +254,62 @@ def trending_artists():
         twitter_trending_artists.append(art_det)
     
     return jsonify(twitter_trending_artists)
+
+
+@app.route("/api/search",methods=['GET','POST'])
+def search():
+    if request.method=='POST':
+        sk=request.json
+        print(sk)
+        search_type=sk["type"]
+        if search_type not in ['artist', 'track', 'album', 'playlist']:
+            print('invalid type')
+            return None
+        myparams = {'type': search_type}
+        myparams['q'] = sk["search"]
+        myparams['limit']=1
+        print(myparams)
+        resp = requests.get(SEARCH_ENDPOINT, params=myparams,headers=authhead)
+        print(jsonify(resp.text))
+        return jsonify(resp.text)
+
+@app.route("/api/userrecomm")
+def userrecomm():
+    global session
+    users=db.users
+    names=user_rc(session['user'])
+    r_no_users=[item for sublist in names for item in sublist]
+    recommended_users=list(set(r_no_users))
+
+    response = []
+    for i in recommended_users:
+        documents = users.find({"Name":i})
+        for document in documents:
+            document['_id'] = str(document['_id'])
+            response.append(document['all_data']['user_data'])
+    return jsonify(response)
+
+@app.route("/api/artistrecomm")
+def artistrecomm():
+    global session
+    rg,ra=artist_rc(session['user'])
+    recommended_a=[]
+    for k,v in ra.items():
+        reca={}
+        reca["artist_name"]=k
+        reca["popularity"]=v
+        recommended_a.append(reca)
+    recommended_artists=recommended_a[-10:]
+    recommended_genres=rg[-10:]
+    return jsonify(recommended_artists[::-1],recommended_genres[::-1])
+
+
+
+@app.route('/api/logout')
+def logout():
+    session["logout"]=True
+    return redirect("http://localhost:3000/")
+
 
 
 if __name__ == "__main__":
